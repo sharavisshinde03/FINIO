@@ -1,0 +1,23 @@
+CREATE TABLE users (
+    id NUMBER PRIMARY KEY,
+    name VARCHAR2(100),
+    email VARCHAR2(100) UNIQUE,
+    password VARCHAR2(255),
+    balance NUMBER
+);
+
+CREATE TABLE transactions (
+    id NUMBER PRIMARY KEY,
+    user_id NUMBER,
+    type VARCHAR2(50),
+    amount NUMBER,
+    date_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE SEQUENCE user_seq START WITH 1 INCREMENT BY 1;
+CREATE SEQUENCE txn_seq START WITH 1 INCREMENT BY 1;
+
+ALTER TABLE transactions
+ADD CONSTRAINT fk_user
+FOREIGN KEY (user_id)
+REFERENCES users(id);
