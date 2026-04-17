@@ -16,6 +16,22 @@ The FINIO Online Banking System is a Java-based desktop application developed us
 
 ---
 
+## Security Features
+
+- Automatic Customer ID Generation  
+  Each user is assigned a unique Customer ID by the system during registration to ensure secure identification.
+
+- Secure UPI Payment System  
+  Users can perform UPI-based transactions with validation checks to ensure safe and accurate transfers.
+
+- Data Validation  
+  Input validation is applied to prevent invalid or unauthorized transactions.
+
+- Balance Verification  
+  Transactions are only processed if sufficient balance is available, preventing overdrafts.
+
+---
+
 ## Technologies Used
 
 - Java (Swing)
@@ -89,10 +105,13 @@ com.bank
 ├── dao
 ├── service
 ├── main
+<<<<<<< HEAD
+|-- util
+=======
+>>>>>>> 6437ac7 (FINIO updated.)
 ```
 
 ---
 
 ## Conclusion
-
 The FINIO Online Banking System demonstrates the implementation of a real-world application using Java, JDBC, and Oracle Database. It effectively applies object-oriented programming principles and follows a modular architecture for better maintainability and scalability.
