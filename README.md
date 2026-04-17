@@ -32,12 +32,14 @@ The FINIO Online Banking System is a Java-based desktop application developed us
 
 ---
 
-## Technologies Used
+## Tech Stack
 
-- Java (Swing)
-- JDBC
-- Oracle Database
-- IntelliJ IDEA
+- Core Language: Java  
+- UI Framework: Swing  
+- Database Connectivity: JDBC  
+- Database: Oracle SQL  
+- IDE: IntelliJ IDEA  
+- Version Control: Git & GitHub  
 
 ---
 
