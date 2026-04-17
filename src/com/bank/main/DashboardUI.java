@@ -117,7 +117,6 @@ public class DashboardUI extends JFrame {
 
         panel.add(createTopCards(), BorderLayout.NORTH);
 
-        // 🔥 DELETE BUTTON
         JButton deleteBtn = new JButton("Delete Selected");
         deleteBtn.setBackground(new Color(220, 38, 38));
         deleteBtn.setForeground(Color.BLACK);
@@ -133,7 +132,6 @@ public class DashboardUI extends JFrame {
             }
         });
 
-        // 🔥 RIGHT ALIGN FIX
         JPanel topBar = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         topBar.setBackground(new Color(18, 28, 45));
         topBar.add(deleteBtn);
@@ -199,6 +197,7 @@ public class DashboardUI extends JFrame {
         return card;
     }
 
+    // ✅ RESTORED CREDIT CARD UI
     private JPanel createCreditCard() {
 
         JPanel card = new JPanel() {
@@ -261,14 +260,24 @@ public class DashboardUI extends JFrame {
 
             else if (action.equals("Withdraw")) {
                 String amt = JOptionPane.showInputDialog("Enter amount:");
+
                 if (amt != null) {
-                    userService.withdraw(currentUser.getId(), Double.parseDouble(amt));
+
+                    double amount = Double.parseDouble(amt);
+
+                    boolean success = userService.withdraw(currentUser.getId(), amount);
+
+                    if (!success) {
+                        JOptionPane.showMessageDialog(this, "Insufficient Balance!");
+                        return;
+                    }
+
                     refreshData();
                 }
             }
 
             else if (action.equals("UPI")) {
-                new UPIUI(currentUser.getId());
+                new UPIUI(currentUser.getId(), this);
             }
 
             else if (action.equals("Exit")) {
@@ -283,8 +292,17 @@ public class DashboardUI extends JFrame {
     // ================= REFRESH =================
     private void refreshData() {
 
+        refreshBalance();
+        refreshTransactions();
+    }
+
+    // 🔥 ADDED METHODS
+    public void refreshBalance() {
         double balance = userService.checkBalance(currentUser.getId());
         balanceLabel.setText("₹ " + balance);
+    }
+
+    public void refreshTransactions() {
 
         tableModel.setRowCount(0);
 

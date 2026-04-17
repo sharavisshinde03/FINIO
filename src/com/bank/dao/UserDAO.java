@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface UserDAO {
 
-    void addUser(User user);
+    int addUser(User user); // 🔥 changed from void → int
 
     User login(String email, String password);
 
@@ -16,12 +16,11 @@ public interface UserDAO {
 
     void withdraw(int userId, double amount);
 
-    List<Transaction> getTransactions(int userId);
-
     void deleteUser(int userId);
 
     void updateUser(User user);
-
-    // 🔥 ADDED (SEARCH)
+    User loginById(int id, String password);
     User getUserByEmail(String email);
+
+    List<Transaction> getTransactions(int userId);
 }

@@ -11,11 +11,15 @@ import java.util.List;
 public class UserDAOImpl implements UserDAO {
 
     @Override
-    public void addUser(User user) {
+    public int addUser(User user) {
+
+        int generatedId = -1;
+
         try (Connection con = DBConnection.getConnection()) {
 
             String sql = "INSERT INTO users (id, name, email, password, balance) VALUES (user_seq.NEXTVAL, ?, ?, ?, ?)";
-            PreparedStatement ps = con.prepareStatement(sql);
+
+            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
 
             ps.setString(1, user.getName().trim());
             ps.setString(2, user.getEmail().trim());
@@ -24,9 +28,16 @@ public class UserDAOImpl implements UserDAO {
 
             ps.executeUpdate();
 
+            ResultSet rs = ps.getGeneratedKeys();
+            if (rs.next()) {
+                generatedId = rs.getInt(1);
+            }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
+        return generatedId;
     }
 
     @Override
@@ -55,6 +66,36 @@ public class UserDAOImpl implements UserDAO {
             e.printStackTrace();
         }
         return null;
+    }
+    @Override
+    public User loginById(int id, String password) {
+
+        User user = null;
+
+        try (Connection con = DBConnection.getConnection()) {
+
+            String sql = "SELECT * FROM users WHERE id = ? AND password = ?";
+            PreparedStatement ps = con.prepareStatement(sql);
+
+            ps.setInt(1, id);
+            ps.setString(2, password);
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                user = new User();
+                user.setId(rs.getInt("id"));
+                user.setName(rs.getString("name"));
+                user.setEmail(rs.getString("email"));
+                user.setPassword(rs.getString("password"));
+                user.setBalance(rs.getDouble("balance"));
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return user;
     }
 
     @Override

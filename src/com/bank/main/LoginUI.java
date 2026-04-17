@@ -18,11 +18,10 @@ public class LoginUI extends JFrame {
         setDefaultCloseOperation(EXIT_ON_CLOSE);
         setLayout(new GridLayout(1, 2));
 
-        Color dark = new Color(10, 18, 32);
         Color accent = new Color(45, 212, 191);
         Color textColor = new Color(220, 230, 240);
 
-        // 🔷 LEFT PANEL (FORM)
+        // 🔷 LEFT PANEL
         JPanel left = new JPanel();
         left.setBackground(new Color(245, 247, 250));
         left.setLayout(null);
@@ -31,14 +30,14 @@ public class LoginUI extends JFrame {
         title.setFont(new Font("Segoe UI", Font.BOLD, 26));
         title.setBounds(50, 50, 300, 30);
 
-        JLabel tagline = new JLabel("Secure Digital Banking Experience");
+        JLabel tagline = new JLabel("Use Email or Customer ID");
         tagline.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         tagline.setForeground(Color.GRAY);
         tagline.setBounds(50, 80, 300, 20);
 
-        JTextField email = new JTextField();
-        email.setBorder(BorderFactory.createTitledBorder("Email"));
-        email.setBounds(50, 140, 300, 50);
+        JTextField loginField = new JTextField();
+        loginField.setBorder(BorderFactory.createTitledBorder("Email or Customer ID"));
+        loginField.setBounds(50, 140, 300, 50);
 
         JPasswordField password = new JPasswordField();
         password.setBorder(BorderFactory.createTitledBorder("Password"));
@@ -47,23 +46,21 @@ public class LoginUI extends JFrame {
         JButton login = new JButton("Login");
         login.setBackground(new Color(20, 30, 60));
         login.setForeground(Color.BLACK);
-        login.setFocusPainted(false);
         login.setBounds(50, 280, 300, 45);
 
         JButton register = new JButton("Create Account");
         register.setBackground(accent);
         register.setForeground(Color.BLACK);
-        register.setFocusPainted(false);
         register.setBounds(50, 340, 300, 45);
 
         left.add(title);
         left.add(tagline);
-        left.add(email);
+        left.add(loginField);
         left.add(password);
         left.add(login);
         left.add(register);
 
-        // 🔷 RIGHT PANEL (FINTECH STYLE)
+        // 🔷 RIGHT PANEL
         JPanel right = new JPanel() {
             protected void paintComponent(Graphics g) {
                 super.paintComponent(g);
@@ -87,7 +84,6 @@ public class LoginUI extends JFrame {
         logo.setBounds(120, 180, 300, 40);
 
         JLabel sub = new JLabel("Smart. Secure. Seamless Banking.");
-        sub.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         sub.setForeground(textColor);
         sub.setBounds(90, 230, 300, 20);
 
@@ -97,20 +93,50 @@ public class LoginUI extends JFrame {
         add(left);
         add(right);
 
-        // 🔥 LOGIN ACTION
+        // 🔥 LOGIN ACTION (CLEANED)
         login.addActionListener(e -> {
 
-            String emailText = email.getText().trim();
+            String input = loginField.getText().trim();
             String passwordText = new String(password.getPassword()).trim();
 
-            User user = userService.login(emailText, passwordText);
-
-            if (user != null) {
-                dispose();
-                new DashboardUI(user);
-            } else {
-                JOptionPane.showMessageDialog(this, "Invalid login");
+            if (input.isEmpty() || passwordText.isEmpty()) {
+                JOptionPane.showMessageDialog(this, "All fields are required!");
+                return;
             }
+
+            User user = null;
+
+            // 🔥 CUSTOMER ID LOGIN
+            if (input.matches("\\d+")) {
+
+                int id = Integer.parseInt(input);
+                user = userService.loginById(id, passwordText);
+
+                if (user == null) {
+                    JOptionPane.showMessageDialog(this, "Invalid Customer ID or Password!");
+                    return;
+                }
+
+            }
+            // 🔥 EMAIL LOGIN
+            else {
+
+                if (!input.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+                    JOptionPane.showMessageDialog(this, "Enter valid email!");
+                    return;
+                }
+
+                user = userService.login(input, passwordText);
+
+                if (user == null) {
+                    JOptionPane.showMessageDialog(this, "Invalid Email or Password!");
+                    return;
+                }
+            }
+
+            // ✅ SUCCESS
+            dispose();
+            new DashboardUI(user);
         });
 
         register.addActionListener(e -> new RegisterUI());

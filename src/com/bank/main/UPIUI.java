@@ -10,8 +10,13 @@ public class UPIUI extends JFrame {
     private UserService service;
     private int userId;
 
-    public UPIUI(int userId) {
+    // ✅ Correct type
+    private DashboardUI dashboard;
+
+    // ✅ FIXED constructor
+    public UPIUI(int userId, DashboardUI dashboard) {
         this.userId = userId;
+        this.dashboard = dashboard;
         this.service = new UserService();
 
         setTitle("FINIO UPI Payment");
@@ -49,7 +54,6 @@ public class UPIUI extends JFrame {
         panel.setLayout(null);
         panel.setBackground(Color.WHITE);
 
-        // Currency Selector
         String[] currencies = {"INR ₹", "USD $", "EUR €", "GBP £"};
         JComboBox<String> currencyBox = new JComboBox<>(currencies);
         currencyBox.setBounds(20, 20, 120, 30);
@@ -59,14 +63,12 @@ public class UPIUI extends JFrame {
         account.setBounds(160, 20, 200, 30);
         panel.add(account);
 
-        // Amount
         JTextField amount = new JTextField();
         amount.setBounds(20, 60, 360, 40);
         amount.setFont(new Font("Segoe UI", Font.BOLD, 16));
         amount.setBorder(BorderFactory.createTitledBorder("Enter Amount"));
         panel.add(amount);
 
-        // Payment Options
         JLabel opt = new JLabel("Payment Options");
         opt.setBounds(20, 110, 200, 20);
         panel.add(opt);
@@ -92,7 +94,6 @@ public class UPIUI extends JFrame {
         panel.add(wallet);
         panel.add(upi);
 
-        // 🔥 UPI / PHONE INPUT
         JTextField upiField = new JTextField();
         upiField.setBounds(20, 270, 240, 40);
         upiField.setBorder(BorderFactory.createTitledBorder("Enter UPI ID or Phone"));
@@ -105,7 +106,6 @@ public class UPIUI extends JFrame {
         panel.add(upiField);
         panel.add(verify);
 
-        // PAY BUTTON
         JButton pay = new JButton("PAY NOW");
         pay.setBounds(20, 340, 360, 50);
         pay.setBackground(new Color(20, 180, 170));
@@ -114,7 +114,7 @@ public class UPIUI extends JFrame {
 
         panel.add(pay);
 
-        // ================= VALIDATION =================
+        // ================= VERIFY =================
         verify.addActionListener(e -> {
 
             String input = upiField.getText().trim();
@@ -137,27 +137,49 @@ public class UPIUI extends JFrame {
                     return;
                 }
 
+                if (amount.getText().trim().isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "Amount cannot be empty");
+                    return;
+                }
+
                 double amt = Double.parseDouble(amount.getText());
+
+                if (amt <= 0) {
+                    JOptionPane.showMessageDialog(this, "Enter valid amount");
+                    return;
+                }
 
                 String selectedCurrency = (String) currencyBox.getSelectedItem();
                 String symbol = getSymbol(selectedCurrency);
 
-                service.withdraw(userId, amt);
+                boolean success = service.withdraw(userId, amt);
+
+                if (!success) {
+                    JOptionPane.showMessageDialog(this, "Insufficient Balance!");
+                    return;
+                }
+
+                // 🔥 LIVE REFRESH
+                dashboard.refreshBalance();
+                dashboard.refreshTransactions();
 
                 JOptionPane.showMessageDialog(
                         this,
                         "Payment Successful!\nTo: " + input + "\nAmount: " + symbol + " " + amt
                 );
 
+                dispose();
+
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Enter valid numeric amount");
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Invalid Input");
+                JOptionPane.showMessageDialog(this, "Something went wrong");
             }
         });
 
         return panel;
     }
 
-    // ================= VALIDATION =================
     private boolean isValidUPI(String input) {
         return input.matches("^[a-zA-Z0-9._-]+@[a-zA-Z]+$");
     }
@@ -166,7 +188,6 @@ public class UPIUI extends JFrame {
         return input.matches("\\d{10}");
     }
 
-    // ================= SYMBOL =================
     private String getSymbol(String currency) {
         if (currency.contains("INR")) return "₹";
         if (currency.contains("USD")) return "$";

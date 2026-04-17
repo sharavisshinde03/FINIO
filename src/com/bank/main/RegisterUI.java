@@ -98,15 +98,42 @@ public class RegisterUI extends JFrame {
         register.addActionListener(e -> {
             try {
 
+                String userName = name.getText().trim();
+                String userEmail = email.getText().trim();
+                String userPassword = new String(password.getPassword()).trim();
+
+                // 🔒 EMPTY VALIDATION
+                if (userName.isEmpty() || userEmail.isEmpty() || userPassword.isEmpty()) {
+                    JOptionPane.showMessageDialog(this, "All fields are required!");
+                    return;
+                }
+
+                // 🔒 EMAIL VALIDATION
+                if (!userEmail.matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")) {
+                    JOptionPane.showMessageDialog(this, "Enter valid email!");
+                    return;
+                }
+
+                // 🔥 DUPLICATE EMAIL CHECK (ADDED)
+                if (userService.searchUser(userEmail) != null) {
+                    JOptionPane.showMessageDialog(this, "Email already registered!");
+                    return;
+                }
+
                 User u = new User();
-                u.setName(name.getText().trim());
-                u.setEmail(email.getText().trim());
-                u.setPassword(new String(password.getPassword()).trim());
+                u.setName(userName);
+                u.setEmail(userEmail);
+                u.setPassword(userPassword);
                 u.setBalance(0);
 
-                userService.register(u);
+                // 🔥 GET GENERATED ID FROM DB
+                int generatedId = userService.register(u);
 
-                JOptionPane.showMessageDialog(this, "Registered Successfully!");
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Registered Successfully!\n\nYour Customer ID: " + generatedId
+                );
+
                 dispose();
 
             } catch (Exception ex) {
